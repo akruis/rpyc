@@ -1,11 +1,11 @@
 """
 brine - a simple, fast and secure object serializer for immutable objects,
 optimized for small integers [-48..160).
-the following types are supported: int, long, bool, str, float, unicode, 
+the following types are supported: int, bytes, bool, str, float, str, 
 slice, complex, tuple(of simple types), forzenset(of simple types)
 as well as the following singletons: None, NotImplemented, Ellipsis
 """
-from cStringIO import StringIO
+from io import BytesIO
 from rpyc.lib.compat import Struct, all
 
 
@@ -47,7 +47,7 @@ C16 = Struct("!dd")
 
 _dump_registry = {}
 _load_registry = {}
-IMM_INTS_LOADER = dict((v, k) for k, v in IMM_INTS.iteritems())
+IMM_INTS_LOADER = dict((v, k) for k, v in IMM_INTS.items())
 
 def register(coll, key):
     def deco(func):
@@ -99,13 +99,8 @@ def _dump_int(obj, stream):
         else:
             stream.append(TAG_INT_L4 + I4.pack(l) + obj)
 
-@register(_dump_registry, long)
-def _dump_long(obj, stream):
-    stream.append(TAG_LONG)
-    _dump_int(obj, stream)
-
-@register(_dump_registry, str)
-def _dump_str(obj, stream):
+@register(_dump_registry, bytes)
+def _dump_bytes(obj, stream):
     l = len(obj)
     if l == 0:
         stream.append(TAG_EMPTY_STR)
@@ -130,10 +125,10 @@ def _dump_float(obj, stream):
 def _dump_complex(obj, stream):
     stream.append(TAG_COMPLEX + C16.pack(obj.real, obj.imag))
 
-@register(_dump_registry, unicode)
+@register(_dump_registry, str)
 def _dump_unicode(obj, stream):
     stream.append(TAG_UNICODE)
-    _dump_str(obj.encode("utf8"), stream)
+    _dump_bytes(obj.encode("utf8"), stream)
 
 @register(_dump_registry, tuple)
 def _dump_tuple(obj, stream):
@@ -191,8 +186,7 @@ def _load_unicode(stream):
     return obj.decode("utf-8")
 @register(_load_registry, TAG_LONG)
 def _load_long(stream):
-    obj = _load(stream)
-    return long(obj)
+    return _load(stream)
 
 @register(_load_registry, TAG_FLOAT)
 def _load_float(stream):
@@ -203,23 +197,23 @@ def _load_complex(stream):
     return complex(real, imag)
 
 @register(_load_registry, TAG_STR1)
-def _load_str1(stream):
+def _load_bytes1(stream):
     return stream.read(1)
 @register(_load_registry, TAG_STR2)
-def _load_str2(stream):
+def _load_bytes2(stream):
     return stream.read(2)
 @register(_load_registry, TAG_STR3)
-def _load_str3(stream):
+def _load_bytes3(stream):
     return stream.read(3)
 @register(_load_registry, TAG_STR4)
-def _load_str4(stream):
+def _load_bytes4(stream):
     return stream.read(4)
 @register(_load_registry, TAG_STR_L1)
-def _load_str_l1(stream):
+def _load_bytes_l1(stream):
     l, = I1.unpack(stream.read(1))
     return stream.read(l)
 @register(_load_registry, TAG_STR_L4)
-def _load_str_l4(stream):
+def _load_bytes_l4(stream):
     l, = I4.unpack(stream.read(4))
     return stream.read(l)
 
@@ -278,10 +272,10 @@ def dump(obj):
 
 def load(data):
     """loads the given byte-string representation to an object"""
-    stream = StringIO(data)
+    stream = BytesIO(data)
     return _load(stream)
 
-simple_types = frozenset([type(None), int, long, bool, str, float, unicode, 
+simple_types = frozenset([type(None), int, bool, str, float, bytes, 
     slice, complex, type(NotImplemented), type(Ellipsis)])
 def dumpable(obj):
     """indicates whether the object is dumpable by brine"""
@@ -293,7 +287,7 @@ def dumpable(obj):
 
 
 if __name__ == "__main__":
-    x = ("he", 7, u"llo", 8, (), 900, None, True, Ellipsis, 18.2, 18.2j + 13, 
+    x = (b"he", 7, "llo", 8, (), 900, None, True, Ellipsis, 18.2, 18.2j + 13, 
         slice(1,2,3), frozenset([5,6,7]), NotImplemented)
     assert dumpable(x)
     y = dump(x)

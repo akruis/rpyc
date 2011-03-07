@@ -5,7 +5,7 @@ import sys
 import select
 import weakref
 import itertools
-import cPickle as pickle
+import pickle
 from threading import Lock
 from rpyc.lib.colls import WeakValueDict, RefCountingColl
 from rpyc.core import consts, brine, vinegar, netref

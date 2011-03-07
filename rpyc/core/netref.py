@@ -7,7 +7,7 @@ Heart Disease, Emphysema, and May Complicate Pregnancy. Close your eyes!
 import sys
 import inspect
 import types
-import cPickle as pickle
+import pickle
 from rpyc.core import consts
 
 
@@ -144,7 +144,7 @@ def inspect_methods(obj):
         mros = reversed(type(obj).__mro__)
     for basecls in mros:
         attrs.update(basecls.__dict__)
-    for name, attr in attrs.iteritems():
+    for name, attr in attrs.items():
         if name not in _local_netref_attrs and hasattr(attr, "__call__"):
             methods[name] = inspect.getdoc(attr)
     return methods.items()

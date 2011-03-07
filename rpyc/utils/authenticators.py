@@ -58,7 +58,7 @@ def SSLAuthenticator(object):
             sock2 = ssl.wrap_socket(sock, keyfile = self.keyfile, certfile = self.certfile,
                 server_side = True, ssl_version = self.ssl_version, ca_certs = self.ca_certs,
                 cert_reqs = self.cert_reqs)
-        except ssl.SSLError, ex:
+        except ssl.SSLError as ex:
             raise AuthenticationError(str(ex))
         return sock2, sock2.getpeercert()
 
@@ -73,7 +73,7 @@ class TlsliteVdbAuthenticator(object):
     @classmethod
     def from_dict(cls, users): 
         inst = cls(tlsapi.VerifierDB())
-        for username, password in users.iteritems():
+        for username, password in users.items():
             inst.set_user(username, password)
         return inst
     
@@ -119,7 +119,7 @@ class TlsliteVdbAuthenticator(object):
         sock2.fileno = lambda fd=sock.fileno(): fd    # tlslite omitted fileno
         try:
             sock2.handshakeServer(verifierDB = self.vdb)
-        except Exception, ex:
+        except Exception as ex:
             raise AuthenticationError(str(ex))
         return sock2, sock2.allegedSrpUsername
 

@@ -1,7 +1,7 @@
 import sys
 import os
 import inspect
-import cPickle as pickle
+import pickle
 import rpyc
 from rpyc import SlaveService
 from rpyc.utils import factory
@@ -154,11 +154,11 @@ def obtain(proxy):
     on the remote object"""
     return pickle.loads(pickle.dumps(proxy))
 
-def deliver(conn, localobj):
+def deliver(conn, localobj, proto = 2):
     """delivers (recreates) a local object on the other party. the object is
     moved by *value*, so changes made to it will not reflect on the local 
     object. returns a proxy to the remote object"""
-    return conn.modules.cPickle.loads(pickle.dumps(localobj))
+    return conn.modules.cPickle.loads(pickle.dumps(localobj, proto))
 
 class redirected_stdio(object):
     """redirects the other party's stdin, stdout and stderr to those of the 

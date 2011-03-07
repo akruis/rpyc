@@ -105,7 +105,7 @@ class SocketStream(Stream):
                 buf = self.sock.recv(min(self.MAX_IO_CHUNK, count))
             except socket.timeout:
                 continue
-            except socket.error, ex:
+            except socket.error as ex:
                 if ex[0] in retry_errnos:
                     # windows just has to be a bitch
                     continue
@@ -122,7 +122,7 @@ class SocketStream(Stream):
             while data:
                 count = self.sock.send(data[:self.MAX_IO_CHUNK])
                 data = data[count:]
-        except socket.error, ex:
+        except socket.error as ex:
             self.close()
             raise EOFError(ex)
 
@@ -165,7 +165,7 @@ class PipeStream(Stream):
         except EOFError:
             self.close()
             raise
-        except EnvironmentError, ex:
+        except EnvironmentError as ex:
             self.close()
             raise EOFError(ex)
         return "".join(data)
@@ -175,7 +175,7 @@ class PipeStream(Stream):
                 chunk = data[:self.MAX_IO_CHUNK]
                 written = os.write(self.outgoing.fileno(), chunk)
                 data = data[written:]
-        except EnvironmentError, ex:
+        except EnvironmentError as ex:
             self.close()
             raise EOFError(ex)
 
@@ -222,11 +222,11 @@ class Win32PipeStream(Stream):
                 dummy, buf = win32file.ReadFile(self.incoming, int(min(self.MAX_IO_CHUNK, count)))
                 count -= len(buf)
                 data.append(buf)
-        except TypeError, ex:
+        except TypeError as ex:
             if not self.closed:
                 raise
             raise EOFError(ex)
-        except win32file.error, ex:
+        except win32file.error as ex:
             self.close()
             raise EOFError(ex)
         return "".join(data)
@@ -235,11 +235,11 @@ class Win32PipeStream(Stream):
             while data:
                 dummy, count = win32file.WriteFile(self.outgoing, data[:self.MAX_IO_CHUNK])
                 data = data[count:]
-        except TypeError, ex:
+        except TypeError as ex:
             if not self.closed:
                 raise
             raise EOFError(ex)
-        except win32file.error, ex:
+        except win32file.error as ex:
             self.close()
             raise EOFError(ex)
     
@@ -255,7 +255,7 @@ class Win32PipeStream(Stream):
                 if time.time() >= tmax:
                     break
                 time.sleep(interval)
-        except TypeError, ex:
+        except TypeError as ex:
             if not self.closed:
                 raise
             raise EOFError(ex)

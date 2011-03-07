@@ -7,7 +7,6 @@ made non-secure
 import sys
 import exceptions
 import traceback
-from types import InstanceType, ClassType
 from rpyc.core import brine
 from rpyc.core import consts
 

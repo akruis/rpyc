@@ -9,7 +9,7 @@ class WeakValueDict(object):
     def __repr__(self):
         return repr(self._dict)
     def __iter__(self):
-        return self.iterkeys()
+        return self.keys()
     def __len__(self):
         return len(self._dict)
     def __contains__(self, key):
@@ -35,20 +35,14 @@ class WeakValueDict(object):
         self._dict[key] = weakref.ref(value, remover)
     def __delitem__(self, key):
         del self._dict[key]
-    def iterkeys(self):
-        return self._dict.iterkeys()
     def keys(self):
         return self._dict.keys()
-    def itervalues(self):
+    def values(self):
         for k in self:
             yield self[k]
-    def values(self):
-        return list(self.itervalues())
-    def iteritems(self):
+    def items(self):
         for k in self:
             yield k, self[k]
-    def items(self):
-        return list(self.iteritems())
     def clear(self):
         self._dict.clear()
 

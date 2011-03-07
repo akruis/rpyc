@@ -74,7 +74,7 @@ class Server(object):
                 sock, (h, p) = self.listener.accept()
             except socket.timeout:
                 pass
-            except socket.error, ex:
+            except socket.error as ex:
                 if ex[0] == errno.EINTR:
                     pass
                 else:
