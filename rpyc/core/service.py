@@ -110,7 +110,7 @@ class SlaveService(Service):
         self._conn.builtin = self._conn.modules.__builtin__
     
     def exposed_execute(self, text):
-        exec text in self.exposed_namespace
+        exec(text, self.exposed_namespace)
     def exposed_eval(self, text):
         return eval(text, self.exposed_namespace)
     def exposed_getmodule(self, name):

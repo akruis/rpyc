@@ -2,7 +2,7 @@
 rpyc connection factories
 """
 import socket
-import thread, threading
+import threading
 from rpyc import Connection, Channel, SocketStream, PipeStream, VoidService
 from rpyc.utils.registry import UDPRegistryClient
 from rpyc.lib import safe_import
@@ -147,10 +147,10 @@ def connect_thread(service = VoidService, config = {}, remote_service = VoidServ
         listener.close()
         conn = connect_stream(SocketStream(client), service = remote_service, 
             config = remote_config)
-        try:
-            conn.serve_all()
-        except KeyboardInterrupt:
-            thread.interrupt_main()
+        #try:
+        conn.serve_all()
+        #except KeyboardInterrupt:
+        #    thread.interrupt_main()
     
     t = threading.Thread(target = server)
     t.setDaemon(True)

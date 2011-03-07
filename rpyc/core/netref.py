@@ -20,19 +20,20 @@ _local_netref_attrs = frozenset([
 ])
 
 _builtin_types = [
-    type, object, types.InstanceType, types.ClassType, bool, complex, dict, 
-    file, float, int, list, long, slice, str, basestring, tuple, unicode, 
-    str, set, frozenset, Exception, types.NoneType, types.DictProxyType, 
+    type, object, bool, complex, dict, 
+    float, int, list, slice, str, bytes, tuple, 
+    str, set, frozenset, Exception, type(None), 
     types.BuiltinFunctionType, types.GeneratorType, types.MethodType, 
-    types.CodeType, types.FrameType, types.TracebackType, xrange,
+    types.CodeType, types.FrameType, types.TracebackType, range,
     types.ModuleType, types.FunctionType,
     
+    type(type("dummy", (), {}).__dict__), # dict_proxy
     type(int.__add__), # wrapper_descriptor
     type((1).__add__), # method-wrapper
-    type(iter([])), # listiterator
-    type(iter(())), # tupleiterator
-    type(iter(xrange(10))), # rangeiterator
-    type(iter(set())), # setiterator
+    type(iter([])), # list_iterator
+    type(iter(())), # tuple_iterator
+    type(iter(range(10))), # range_iterator
+    type(iter(set())), # set_iterator
 ]
 
 _normalized_builtin_types = dict(((t.__name__, t.__module__), t) 

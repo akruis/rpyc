@@ -456,7 +456,7 @@ class Connection(object):
     
     # collect handlers
     _HANDLERS = {}
-    for name, obj in locals().items():
+    for name, obj in dict(locals()).items():
         if name.startswith("_handle_"):
             name2 = "HANDLE_" + name[8:].upper()
             if hasattr(consts, name2):

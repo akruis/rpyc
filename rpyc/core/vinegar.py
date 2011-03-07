@@ -5,8 +5,8 @@ note that by changing the configuration parameters, this module can be
 made non-secure
 """
 import sys
-import exceptions
 import traceback
+import builtins
 from rpyc.core import brine
 from rpyc.core import consts
 
@@ -44,19 +44,15 @@ def dump(typ, val, tb, include_local_traceback):
             attrs.append((name, attrval))
     return (typ.__module__, typ.__name__), tuple(args), tuple(attrs), tbtext
 
-try:
-    BaseException
-except NameError:
-    # python 2.4 compatible
-    BaseException = Exception
-
-def load(val, import_custom_exceptions, instantiate_custom_exceptions, instantiate_oldstyle_exceptions):
+def load(val, import_custom_exceptions, instantiate_custom_exceptions):
     if val == consts.EXC_STOP_ITERATION:
         return StopIteration # optimization
     if type(val) is str:
         return val # deprecated string exceptions
     
     (modname, clsname), args, attrs, tbtext = val
+    if modname == "exceptions":
+        modname = "builtins"
     if import_custom_exceptions and modname not in sys.modules:
         try:
             mod = __import__(modname, None, None, "*")
@@ -64,34 +60,22 @@ def load(val, import_custom_exceptions, instantiate_custom_exceptions, instantia
             pass
     if instantiate_custom_exceptions:
         cls = getattr(sys.modules[modname], clsname, None)
-    elif modname == "exceptions":
-        cls = getattr(exceptions, clsname, None)
+    elif modname == "builtins":
+        cls = getattr(builtins, clsname, None)
     else:
         cls = None
     
-    if not isinstance(cls, (type, ClassType)):
-        cls = None
-    elif issubclass(cls, ClassType) and not instantiate_oldstyle_exceptions:
-        cls = None
-    elif not issubclass(cls, BaseException):
+    if not isinstance(cls, BaseException):
         cls = None
     
     if cls is None:
         fullname = "%s.%s" % (modname, clsname)
         if fullname not in _generic_exceptions_cache:
             fakemodule = {"__module__" : "%s.%s" % (__name__, modname)}
-            if isinstance(GenericException, ClassType):
-                _generic_exceptions_cache[fullname] = ClassType(fullname, (GenericException,), fakemodule)
-            else:
-                _generic_exceptions_cache[fullname] = type(fullname, (GenericException,), fakemodule)
+            _generic_exceptions_cache[fullname] = type(fullname, (GenericException,), fakemodule)
         cls = _generic_exceptions_cache[fullname]
     
-    # support old-style exception classes
-    if isinstance(cls, ClassType):
-        exc = InstanceType(cls)
-    else:
-        exc = cls.__new__(cls)
-    
+    exc = cls.__new__(cls)
     exc.args = args
     for name, attrval in attrs:
         setattr(exc, name, attrval)
